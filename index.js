@@ -44,7 +44,7 @@ var connectedEvent = function() {
     logging.info('Connected, subscribing ')
     topics.forEach(function (topic) {
         logging.info(' => Subscribing to: ' + topic)
-        global.client.subscribe(topic)
+        client.subscribe(topic)
     }, this)
 }
 
