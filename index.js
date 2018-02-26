@@ -35,6 +35,17 @@ if (!_.isNil(shouldRetain)) {
 
 var connectedEvent = function() {
     health.healthyEvent()
+
+    const topics = [ecobeeTopic + '/fan/set', 
+        ecobeeTopic + '/mode/set', 
+        ecobeeTopic + '/temperature/cool/set',
+        ecobeeTopic + '/temperature/heat/set'
+    ]
+    logging.info('Connected, subscribing ')
+    topics.forEach(function (topic) {
+        logging.info(' => Subscribing to: ' + topic)
+        global.client.subscribe(topic)
+    }, this)
 }
 
 var disconnectedEvent = function() {
