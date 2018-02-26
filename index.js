@@ -49,11 +49,29 @@ var currentFanMode = null
 var currentHeatTemp = null
 var currentCoolTemp = null
 
+client.on('message', (topic, message) => {
+    logging.info(' ' + topic + ':' + message, { topic: topic, value: message })
+    var target = '' + message
+    if (topic.indexOf('/mode/set') >= 0) {
+        logging.info('MQTT Set Mode: ' + target, { action: 'setmode', value: target })
+        updateThermostat(target, 'none', 0, 0)
+    } else if (topic.indexOf('/fan/set') >= 0) {
+        logging.info('MQTT Set Fan Mode: ' + target, { action: 'setfanmode', result: target })
+        updateThermostat('none', target, 0, 0)
+    } else if (topic.indexOf('/temperature/heat/set') >= 0) {
+        logging.info('MQTT Set Heat Temperature: ' + target, { action: 'setheat', result: target })
+        updateThermostat('none', 'none', 0, target)
+    } else if (topic.indexOf('/temperature/cool/set') >= 0) {
+        logging.info('MQTT Set Cool Temperature: ' + target, { action: 'setcool', result: target })
+        updateThermostat('none', 'none', target, 0)
+    } 
+})
+
 function queryStatus(host, callback) {
     request('http://' + host + '/query/info', function (error, response, body) {
         if (!error && response.statusCode == 200) {
             health.healthyEvent()
-            
+
             var stat = JSON.parse(body);
             logging.info(stat);
             currentHVACMode = stat.mode
@@ -74,6 +92,14 @@ function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
     var coolTempNumber = currentCoolTemp
     var heatTempNumber = currentHeatTemp
 
+    if ( coolTemp > 0 ) {
+        coolTempNumber = coolTemp
+    }
+    
+    if ( heatTemp > 0 ) {
+        heatTempNumber = heatTemp
+    }
+    
     switch (hvacMode) {
         case 'off':
             hvacModeNumber = 0
