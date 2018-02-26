@@ -104,11 +104,15 @@ function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
     var heatTempNumber = currentHeatTemp
 
     if ( coolTemp > 0 ) {
+        coolTemp = Number(coolTemp).toFixed(0)
         coolTempNumber = coolTemp
+        currentCoolTemp = coolTemp
     }
     
     if ( heatTemp > 0 ) {
+        heatTemp = Number(heatTemp).toFixed(0)
         heatTempNumber = heatTemp
+        currentHeatTemp = heatTemp
     }
     
     switch (hvacMode) {
@@ -145,7 +149,7 @@ function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
     }
 
     logging.info('updating with value: ' + JSON.stringify(formValue))
-    
+
     request.post({
         url:'http://' + thermostat_host + '/control', 
         form: formValue
