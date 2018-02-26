@@ -138,7 +138,7 @@ function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
 
 
     request.post({
-        url:'http://' + host + '/control', 
+        url:'http://' + thermostat_host + '/control', 
         form:{
             mode:hvacModeNumber,
             fan:fanModeNumber,
