@@ -137,14 +137,18 @@ function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
     }
 
 
+    const formValue = {
+        mode:hvacModeNumber,
+        fan:fanModeNumber,
+        heattemp: heatTempNumber, 
+        cooltemp: coolTempNumber
+    }
+
+    logging.info('updating with value: ' + JSON.stringify(formValue))
+    
     request.post({
         url:'http://' + thermostat_host + '/control', 
-        form:{
-            mode:hvacModeNumber,
-            fan:fanModeNumber,
-            heattemp: heatTempNumber, 
-            cooltemp: coolTempNumber
-        }
+        form: formValue
       }, function(e,r, body){
         logging.error(body);
       })
