@@ -36,10 +36,10 @@ if (!_.isNil(shouldRetain)) {
 var connectedEvent = function() {
     health.healthyEvent()
 
-    const topics = [ecobeeTopic + '/fan/set', 
-        ecobeeTopic + '/mode/set', 
-        ecobeeTopic + '/temperature/cool/set',
-        ecobeeTopic + '/temperature/heat/set'
+    const topics = [topic_prefix + '/fan/set', 
+        topic_prefix + '/mode/set', 
+        topic_prefix + '/temperature/cool/set',
+        topic_prefix + '/temperature/heat/set'
     ]
     logging.info('Connected, subscribing ')
     topics.forEach(function (topic) {
