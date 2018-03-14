@@ -83,8 +83,8 @@ function queryStatus(host, callback) {
         if (!error && response.statusCode == 200) {
             health.healthyEvent()
 
-            var stat = JSON.parse(body);
-            logging.info(stat);
+            var stat = JSON.parse(body)
+            logging.info(stat)
             currentHVACMode = stat.mode
             currentFanMode = stat.fan
             currentHeatTemp = stat.heattemp
@@ -92,60 +92,56 @@ function queryStatus(host, callback) {
             
             Object.keys(stat).forEach(statistic => {
                 client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString())
-            });
+            })
         }
     })
 }
 
 function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
-    var hvacModeNumber = currentHVACMode
-    var fanModeNumber = currentFanMode
-    var coolTempNumber = currentCoolTemp
-    var heatTempNumber = currentHeatTemp
-
     if ( coolTemp > 0 ) {
         coolTemp = Number(coolTemp).toFixed(0)
-        coolTempNumber = coolTemp
         currentCoolTemp = coolTemp
     }
     
     if ( heatTemp > 0 ) {
         heatTemp = Number(heatTemp).toFixed(0)
-        heatTempNumber = heatTemp
         currentHeatTemp = heatTemp
     }
     
     switch (hvacMode) {
         case 'off':
-            hvacModeNumber = 0
+            currentHVACMode = 0
             break
         case 'heat':
-            hvacModeNumber = 1
+            currentHVACMode = 1
             break
         case 'cool':
-            hvacModeNumber = 2
+            currentHVACMode = 2
             break
         case 'auto':
-            hvacModeNumber = 3
+            currentHVACMode = 3
             break
     }
 
     switch (fanMode) {
         case 'auto':
         case 'off':
-            fanModeNumber = 0
+            currentFanMode = 0
             break
         case 'on':
-            fanModeNumber = 1
+            currentFanMode = 1
             break
     }
 
+    queueThermostatUpdate()
+}
 
+function sendThermostatUpdate() {
     const formValue = {
-        mode:hvacModeNumber,
-        fan:fanModeNumber,
-        heattemp: heatTempNumber, 
-        cooltemp: coolTempNumber
+        mode:currentHVACMode,
+        fan:currentFanMode,
+        heattemp: currentHeatTemp, 
+        cooltemp: currentCoolTemp
     }
 
     logging.info('updating with value: ' + JSON.stringify(formValue))
@@ -154,8 +150,17 @@ function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
         url:'http://' + thermostat_host + '/control', 
         form: formValue
       }, function(e,r, body){
-        logging.error(body);
-      })
+        logging.error(body)
+      })    
+}
+
+var thermostatTimer = null
+
+function queueThermostatUpdate() {
+    if ( !_.isNil(thermostatTimer)) {
+        clearTimeout(thermostatTimer)
+    }
+    thermostatTimer = setTimeout( function() { sendThermostatUpdate() } , 15 * 1000)
 }
 
 function check() {
