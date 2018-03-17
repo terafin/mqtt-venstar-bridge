@@ -137,9 +137,11 @@ function updateThermostat(hvacMode, fanMode, coolTemp, heatTemp) {
 }
 
 function sendThermostatUpdate() {
+    logging.info('queued timer fired')
+
     const formValue = {
-        mode:currentHVACMode,
-        fan:currentFanMode,
+        mode: currentHVACMode,
+        fan: currentFanMode,
         heattemp: currentHeatTemp, 
         cooltemp: currentCoolTemp
     }
@@ -158,8 +160,10 @@ var thermostatTimer = null
 
 function queueThermostatUpdate() {
     if ( !_.isNil(thermostatTimer)) {
+        logging.info('Cancelling queued timer')
         clearTimeout(thermostatTimer)
     }
+    logging.info('Starting queued timer')
     thermostatTimer = setTimeout( function() { sendThermostatUpdate() } , 15 * 1000)
 }
 
