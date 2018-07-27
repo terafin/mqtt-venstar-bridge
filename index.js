@@ -85,10 +85,10 @@ function queryStatus(host, callback) {
 
             var stat = JSON.parse(body)
             logging.info(stat)
-            currentHVACMode = stat.mode
-            currentFanMode = stat.fan
-            currentHeatTemp = stat.heattemp
-            currentCoolTemp = stat.cooltemp
+            if (_.isNil(currentHVACMode) ) currentHVACMode = stat.mode
+            if (_.isNil(currentFanMode) ) currentFanMode = stat.fan
+            if (_.isNil(currentHeatTemp) ) currentHeatTemp = stat.heattemp
+            if (_.isNil(currentCoolTemp) ) currentCoolTemp = stat.cooltemp
             
             Object.keys(stat).forEach(statistic => {
                 client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString())
