@@ -164,7 +164,7 @@ const queryStatus = function(host, callback) {
 			})
 		}
         
-		if ( _.isNil(callback)) {
+		if ( !_.isNil(callback)) {
 			return callback()
 		}
 	})
