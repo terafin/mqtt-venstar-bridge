@@ -139,7 +139,7 @@ client.on('message', (topic, message) => {
 
 const queryStatus = function(host, callback) {
 	request('http://' + host + '/query/info', function(error, response, body) {
-		if (error && response.statusCode == 200) {
+		if (_.isNil(error) && response.statusCode == 200) {
 			health.healthyEvent()
 
 			var stat = JSON.parse(body)
@@ -250,7 +250,7 @@ const check = function() {
 
 const startHostCheck = function() {
 	logging.info('Starting to monitor: ' + thermostat_host)
-	repeat(check).every(30, 's').start.in(1, 'sec')
+	repeat(check).every(queryInterval, 's').start.in(1, 'sec')
 }
 
 startHostCheck()
