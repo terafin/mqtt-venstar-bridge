@@ -170,14 +170,18 @@ const queryStatus = function(host, callback) {
 	})
 }
 
+const roundToHalf = function(num) {
+	return Math.round(num*2)/2
+}
+
 const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp) {
 	if ( coolTemp > 0 ) {
-		coolTemp = Number(coolTemp).toFixed(0)
+		coolTemp = Number(roundToHalf(coolTemp)).toFixed(1)
 		currentCoolTemp = coolTemp
 	}
     
 	if ( heatTemp > 0 ) {
-		heatTemp = Number(heatTemp).toFixed(0)
+		heatTemp = Number(roundToHalf(coolTemp)).toFixed(1)
 		currentHeatTemp = heatTemp
 	}
     
