@@ -8,6 +8,8 @@ const request = require('request')
 const queryInterval = 15
 const updateTimer = 5
 
+var lastKnownState = null
+
 // {
 //     "name": "Thermostat",        // Thermostat name
 //     "mode": 0,                   // Current thermostat mode
@@ -98,6 +100,7 @@ var connectedEvent = function() {
 
 	const topics = [topic_prefix + '/fan/set', 
 		topic_prefix + '/mode/set', 
+		topic_prefix + '/temperature/target/set',
 		topic_prefix + '/temperature/cool/set',
 		topic_prefix + '/temperature/heat/set']
         
@@ -125,16 +128,19 @@ client.on('message', (topic, message) => {
 	var target = '' + message
 	if (topic.indexOf('/mode/set') >= 0) {
 		logging.info('MQTT Set Mode: ' + target, {action: 'setmode', value: target})
-		updateThermostat(target, 'none', 0, 0)
+		updateThermostat(target, 'none', 0, 0, 0)
 	} else if (topic.indexOf('/fan/set') >= 0) {
 		logging.info('MQTT Set Fan Mode: ' + target, {action: 'setfanmode', result: target})
-		updateThermostat('none', target, 0, 0)
+		updateThermostat('none', target, 0, 0, 0)
 	} else if (topic.indexOf('/temperature/heat/set') >= 0) {
 		logging.info('MQTT Set Heat Temperature: ' + target, {action: 'setheat', result: target})
-		updateThermostat('none', 'none', 0, target)
+		updateThermostat('none', 'none', 0, target, 0)
 	} else if (topic.indexOf('/temperature/cool/set') >= 0) {
 		logging.info('MQTT Set Cool Temperature: ' + target, {action: 'setcool', result: target})
-		updateThermostat('none', 'none', target, 0)
+		updateThermostat('none', 'none', target, 0, 0)
+	} else if (topic.indexOf('/temperature/target/set') >= 0) {
+		logging.info('MQTT Set Target Temperature: ' + target, {action: 'settarget', result: target})
+		updateThermostat('none', 'none', 0, 0, target)
 	} 
 })
 
@@ -144,7 +150,11 @@ const queryStatus = function(host, callback) {
 			health.healthyEvent()
 
 			var stat = JSON.parse(body)
-            
+			
+			if ( !_.isNil(stat)) {
+				lastKnownState = stat
+			}
+
 			logging.info(body)
             
 			if (_.isNil(currentHVACMode) ) { 
@@ -175,7 +185,20 @@ const roundToHalf = function(num) {
 	return Math.round(num*2)/2
 }
 
-const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp) {
+const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetTemp) {
+	if ( targetTemp > 0 ) {
+		targetTemp = roundToHalf(targetTemp)
+		var setPointDelta = 2
+
+		if ( !_.isNil(lastKnownState) && !_.isNil(lastKnownState.setpointdelta)) {
+			setPointDelta = lastKnownState.setpointdelta
+		}
+
+		coolTemp = targetTemp + (setPointDelta / 2)
+		heatTemp = targetTemp - (setPointDelta / 2)
+		logging.info('Using target: ' + targetTemp + '(delta: ' + setPointDelta + ')  for setpoints: ' + heatTemp + ':' + coolTemp)
+	}
+
 	if ( coolTemp > 0 ) {
 		coolTemp = Number(roundToHalf(coolTemp)).toFixed(1)
 		currentCoolTemp = coolTemp
