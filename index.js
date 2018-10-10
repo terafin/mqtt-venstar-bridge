@@ -6,6 +6,7 @@ const health = require('homeautomation-js-lib/health.js')
 const request = require('request')
 
 const queryInterval = 15
+const updateTimer = 5
 
 // {
 //     "name": "Thermostat",        // Thermostat name
@@ -144,7 +145,7 @@ const queryStatus = function(host, callback) {
 
 			var stat = JSON.parse(body)
             
-			logging.info(stat)
+			logging.info(body)
             
 			if (_.isNil(currentHVACMode) ) { 
 				currentHVACMode = stat.mode
@@ -181,7 +182,7 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp) {
 	}
     
 	if ( heatTemp > 0 ) {
-		heatTemp = Number(roundToHalf(coolTemp)).toFixed(1)
+		heatTemp = Number(roundToHalf(heatTemp)).toFixed(1)
 		currentHeatTemp = heatTemp
 	}
     
@@ -244,7 +245,7 @@ const queueThermostatUpdate = function() {
     
 	thermostatTimer = setTimeout( function() {
 		sendThermostatUpdate() 
-	}, queryInterval * 1000)
+	}, updateTimer * 1000)
 }
 
 const check = function() {
