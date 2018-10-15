@@ -98,12 +98,12 @@ if (_.isNil(shouldRetain)) {
 var connectedEvent = function() {
 	health.healthyEvent()
 
-	const topics = [topic_prefix + '/fan/set', 
-		topic_prefix + '/mode/set', 
+	const topics = [topic_prefix + '/fan/set',
+		topic_prefix + '/mode/set',
 		topic_prefix + '/temperature/target/set',
 		topic_prefix + '/temperature/cool/set',
 		topic_prefix + '/temperature/heat/set']
-        
+
 	logging.info('Connected, subscribing ')
 	topics.forEach(function(topic) {
 		logging.info(' => Subscribing to: ' + topic)
@@ -124,24 +124,42 @@ var currentHeatTemp = null
 var currentCoolTemp = null
 
 client.on('message', (topic, message) => {
-	logging.info(' ' + topic + ':' + message, {topic: topic, value: message})
+	logging.info(' ' + topic + ':' + message, {
+		topic: topic,
+		value: message
+	})
 	var target = '' + message
 	if (topic.indexOf('/mode/set') >= 0) {
-		logging.info('MQTT Set Mode: ' + target, {action: 'setmode', value: target})
+		logging.info('MQTT Set Mode: ' + target, {
+			action: 'setmode',
+			value: target
+		})
 		updateThermostat(target, 'none', 0, 0, 0)
 	} else if (topic.indexOf('/fan/set') >= 0) {
-		logging.info('MQTT Set Fan Mode: ' + target, {action: 'setfanmode', result: target})
+		logging.info('MQTT Set Fan Mode: ' + target, {
+			action: 'setfanmode',
+			result: target
+		})
 		updateThermostat('none', target, 0, 0, 0)
 	} else if (topic.indexOf('/temperature/heat/set') >= 0) {
-		logging.info('MQTT Set Heat Temperature: ' + target, {action: 'setheat', result: target})
+		logging.info('MQTT Set Heat Temperature: ' + target, {
+			action: 'setheat',
+			result: target
+		})
 		updateThermostat('none', 'none', 0, target, 0)
 	} else if (topic.indexOf('/temperature/cool/set') >= 0) {
-		logging.info('MQTT Set Cool Temperature: ' + target, {action: 'setcool', result: target})
+		logging.info('MQTT Set Cool Temperature: ' + target, {
+			action: 'setcool',
+			result: target
+		})
 		updateThermostat('none', 'none', target, 0, 0)
 	} else if (topic.indexOf('/temperature/target/set') >= 0) {
-		logging.info('MQTT Set Target Temperature: ' + target, {action: 'settarget', result: target})
+		logging.info('MQTT Set Target Temperature: ' + target, {
+			action: 'settarget',
+			result: target
+		})
 		updateThermostat('none', 'none', 0, 0, target)
-	} 
+	}
 })
 
 const queryStatus = function(host, callback) {
@@ -150,65 +168,70 @@ const queryStatus = function(host, callback) {
 			health.healthyEvent()
 
 			var stat = JSON.parse(body)
-			
-			if ( !_.isNil(stat)) {
+
+			if (!_.isNil(stat)) {
 				lastKnownState = stat
 			}
 
-			logging.info(body)
-            
-			if (_.isNil(currentHVACMode) ) { 
+			logging.debug(body)
+
+			if (_.isNil(currentHVACMode)) {
 				currentHVACMode = stat.mode
 			}
-			if (_.isNil(currentFanMode) ) { 
+			if (_.isNil(currentFanMode)) {
 				currentFanMode = stat.fan
 			}
-			if (_.isNil(currentHeatTemp) ) {
+			if (_.isNil(currentHeatTemp)) {
 				currentHeatTemp = stat.heattemp
 			}
-			if (_.isNil(currentCoolTemp) ) { 
+			if (_.isNil(currentCoolTemp)) {
 				currentCoolTemp = stat.cooltemp
 			}
-            
+
 			Object.keys(stat).forEach(statistic => {
 				client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString())
 			})
+		} else {
+			health.unhealthyEvent()
+			logging.error('query failed: ' + error)
+			logging.error('        body: ' + body)
 		}
-        
-		if ( !_.isNil(callback)) {
+
+		if (!_.isNil(callback)) {
 			return callback()
 		}
 	})
 }
 
 const roundToHalf = function(num) {
-	return Math.round(num*2)/2
+	return Math.round(num * 2) / 2
 }
 
 const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetTemp) {
-	if ( targetTemp > 0 ) {
+	if (targetTemp > 0) {
 		targetTemp = roundToHalf(targetTemp)
 		var setPointDelta = 2
 
-		if ( !_.isNil(lastKnownState) && !_.isNil(lastKnownState.setpointdelta)) {
+		if (!_.isNil(lastKnownState) && !_.isNil(lastKnownState.setpointdelta)) {
 			setPointDelta = lastKnownState.setpointdelta
 		}
 
 		coolTemp = targetTemp + (setPointDelta / 2)
 		heatTemp = targetTemp - (setPointDelta / 2)
+
 		logging.info('Using target: ' + targetTemp + '(delta: ' + setPointDelta + ')  for setpoints: ' + heatTemp + ':' + coolTemp)
 	}
 
-	if ( coolTemp > 0 ) {
+	if (coolTemp > 0) {
 		coolTemp = Number(roundToHalf(coolTemp)).toFixed(1)
 		currentCoolTemp = coolTemp
 	}
-    
-	if ( heatTemp > 0 ) {
+
+	if (heatTemp > 0) {
 		heatTemp = Number(roundToHalf(heatTemp)).toFixed(1)
 		currentHeatTemp = heatTemp
 	}
-    
+
 	switch (hvacMode) {
 		case 'off':
 			currentHVACMode = 0
@@ -243,31 +266,41 @@ const sendThermostatUpdate = function() {
 	const formValue = {
 		mode: currentHVACMode,
 		fan: currentFanMode,
-		heattemp: currentHeatTemp, 
+		heattemp: currentHeatTemp,
 		cooltemp: currentCoolTemp
 	}
 
 	logging.info('updating with value: ' + JSON.stringify(formValue))
 
 	request.post({
-		url:'http://' + thermostat_host + '/control', 
+		url: 'http://' + thermostat_host + '/control',
 		form: formValue
-	}, function(e, r, body){
-		logging.error(body)
-	})    
+	}, function(error, response, bodyString) {
+		const body = !_.isNil(bodyString) ? JSON.parse(bodyString) : {}
+		if (_.isNil(error) && response.statusCode == 200 && !_.isNil(body) && _.isNil(body.error)) {
+			logging.info(' update succeeded: ' + bodyString)
+		}  else {
+			logging.error(' update request failed, will retry')
+			logging.error(error)
+			logging.error(JSON.stringify(response))
+			logging.error(bodyString)
+			health.unhealthyEvent()
+			queueThermostatUpdate()
+		}
+	})
 }
 
 var thermostatTimer = null
 
 const queueThermostatUpdate = function() {
-	if ( _.isNil(thermostatTimer)) {
+	if (_.isNil(thermostatTimer)) {
 		logging.info('Cancelling queued timer')
 		clearTimeout(thermostatTimer)
 	}
 	logging.info('Starting queued timer')
-    
-	thermostatTimer = setTimeout( function() {
-		sendThermostatUpdate() 
+
+	thermostatTimer = setTimeout(function() {
+		sendThermostatUpdate()
 	}, updateTimer * 1000)
 }
 
