@@ -191,6 +191,8 @@ const queryStatus = function(host, callback) {
 			Object.keys(stat).forEach(statistic => {
 				client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString())
 			})
+
+			client.smartPublish(topic_prefix + '/temperature/target', Number((currentHeatTemp + currentCoolTemp) / 2).toString() )
 		} else {
 			health.unhealthyEvent()
 			logging.error('query failed: ' + error)
