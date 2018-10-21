@@ -87,7 +87,7 @@ var mqttOptions = {}
 var shouldRetain = process.env.MQTT_RETAIN
 
 if (_.isNil(shouldRetain)) {
-	shouldRetain = false
+	shouldRetain = true
 }
 
 if (_.isNil(shouldRetain)) {
@@ -189,10 +189,10 @@ const queryStatus = function(host, callback) {
 			}
 
 			Object.keys(stat).forEach(statistic => {
-				client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString())
+				client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString(), mqttOptions)
 			})
 
-			client.smartPublish(topic_prefix + '/temperature/target', Number((currentHeatTemp + currentCoolTemp) / 2).toString() )
+			client.smartPublish(topic_prefix + '/temperature/target', Number((currentHeatTemp + currentCoolTemp) / 2).toString(), mqttOptions)
 		} else {
 			health.unhealthyEvent()
 			logging.error('query failed: ' + error)
