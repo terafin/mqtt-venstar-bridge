@@ -9,7 +9,7 @@ const queryInterval = 15
 const updateTimer = 5
 
 var lastKnownState = null
-
+var pendingThermostatUpdate = false
 // {
 //     "name": "Thermostat",        // Thermostat name
 //     "mode": 0,                   // Current thermostat mode
@@ -175,24 +175,28 @@ const queryStatus = function(host, callback) {
 
 			logging.debug(body)
 
-			if (_.isNil(currentHVACMode)) {
-				currentHVACMode = stat.mode
-			}
-			if (_.isNil(currentFanMode)) {
-				currentFanMode = stat.fan
-			}
-			if (_.isNil(currentHeatTemp)) {
-				currentHeatTemp = stat.heattemp
-			}
-			if (_.isNil(currentCoolTemp)) {
-				currentCoolTemp = stat.cooltemp
+			if ( !pendingThermostatUpdate ) {
+				if (!_.isNil(stat.mode)) {
+					currentHVACMode = stat.mode
+				}
+				if (!_.isNil(stat.fan)) {
+					currentFanMode = stat.fan
+				}
+				if (!_.isNil(stat.heattemp)) {
+					currentHeatTemp = stat.heattemp
+				}
+				if (!_.isNil(stat.cooltemp)) {
+					currentCoolTemp = stat.cooltemp
+				}
 			}
 
 			Object.keys(stat).forEach(statistic => {
 				client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString(), mqttOptions)
 			})
 
-			client.smartPublish(topic_prefix + '/temperature/target', Number((currentHeatTemp + currentCoolTemp) / 2).toString(), mqttOptions)
+			if ( !_.isNil(currentHeatTemp) && !_.isNil(currentCoolTemp)) { 
+				client.smartPublish(topic_prefix + '/temperature/target', Number((currentHeatTemp + currentCoolTemp) / 2).toString(), mqttOptions) 
+			}
 		} else {
 			health.unhealthyEvent()
 			logging.error('query failed: ' + error)
@@ -281,6 +285,7 @@ const sendThermostatUpdate = function() {
 		const body = !_.isNil(bodyString) ? JSON.parse(bodyString) : {}
 		if (_.isNil(error) && response.statusCode == 200 && !_.isNil(body) && _.isNil(body.error)) {
 			logging.info(' update succeeded: ' + bodyString)
+			pendingThermostatUpdate = false
 		}  else {
 			logging.error(' update request failed, will retry')
 			logging.error(error)
@@ -295,6 +300,8 @@ const sendThermostatUpdate = function() {
 var thermostatTimer = null
 
 const queueThermostatUpdate = function() {
+	pendingThermostatUpdate = true
+
 	if (_.isNil(thermostatTimer)) {
 		logging.info('Cancelling queued timer')
 		clearTimeout(thermostatTimer)
