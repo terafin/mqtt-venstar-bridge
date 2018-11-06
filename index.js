@@ -271,7 +271,7 @@ const sendThermostatUpdate = function() {
 
 	const formValue = {
 		mode: currentHVACMode,
-		fan: currentFanMode,
+		fan: 0,
 		heattemp: currentHeatTemp,
 		cooltemp: currentCoolTemp
 	}
