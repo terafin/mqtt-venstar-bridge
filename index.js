@@ -82,7 +82,7 @@ if (_.isNil(topic_prefix)) {
 	process.abort()
 }
 
-var mqttOptions = {}
+var mqttOptions = {qos: 2}
 
 var shouldRetain = process.env.MQTT_RETAIN
 
@@ -107,7 +107,7 @@ var connectedEvent = function() {
 	logging.info('Connected, subscribing ')
 	topics.forEach(function(topic) {
 		logging.info(' => Subscribing to: ' + topic)
-		client.subscribe(topic)
+		client.subscribe(topic, {qos: 2})
 	}, this)
 }
 
