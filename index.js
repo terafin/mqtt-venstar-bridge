@@ -90,10 +90,7 @@ if (_.isNil(shouldRetain)) {
 	shouldRetain = true
 }
 
-if (_.isNil(shouldRetain)) {
-	mqttOptions['retain'] = shouldRetain
-}
-
+mqttOptions['retain'] = shouldRetain
 
 var connectedEvent = function() {
 	health.healthyEvent()
@@ -191,6 +188,7 @@ const queryStatus = function(host, callback) {
 			}
 
 			Object.keys(stat).forEach(statistic => {
+				
 				client.smartPublish(topic_prefix + '/' + statistic.toString(), stat[statistic].toString(), mqttOptions)
 			})
 
