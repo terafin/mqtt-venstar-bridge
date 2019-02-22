@@ -207,18 +207,24 @@ const queryStatus = function(host, callback) {
 	})
 }
 
+const requiredSetpointDelta = function() {
+	var setPointDelta = 2
+
+	if (!_.isNil(lastKnownState) && !_.isNil(lastKnownState.setpointdelta)) {
+		setPointDelta = lastKnownState.setpointdelta
+	}
+
+	return setPointDelta
+}
 const roundToHalf = function(num) {
 	return Math.round(num * 2) / 2
 }
 
 const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetTemp) {
+	var setPointDelta = requiredSetpointDelta()
+
 	if (targetTemp > 0) {
 		targetTemp = roundToHalf(targetTemp)
-		var setPointDelta = 2
-
-		if (!_.isNil(lastKnownState) && !_.isNil(lastKnownState.setpointdelta)) {
-			setPointDelta = lastKnownState.setpointdelta
-		}
 
 		coolTemp = targetTemp + (setPointDelta / 2)
 		heatTemp = targetTemp - (setPointDelta / 2)
@@ -229,11 +235,19 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetT
 	if (coolTemp > 0) {
 		coolTemp = Number(roundToHalf(coolTemp)).toFixed(1)
 		currentCoolTemp = coolTemp
+	
+		if ( (currentHeatTemp - currentCoolTemp) < setPointDelta ) { 
+			currentHeatTemp = currentCoolTemp + setPointDelta 
+		}
 	}
 
 	if (heatTemp > 0) {
 		heatTemp = Number(roundToHalf(heatTemp)).toFixed(1)
 		currentHeatTemp = heatTemp
+
+		if ( (currentHeatTemp - currentCoolTemp) < setPointDelta ) { 
+			currentCoolTemp = currentHeatTemp - setPointDelta 
+		}
 	}
 
 	switch (hvacMode) {
