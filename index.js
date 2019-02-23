@@ -237,7 +237,7 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetT
 		currentCoolTemp = coolTemp
 	
 		if ( (currentHeatTemp - currentCoolTemp) < setPointDelta ) { 
-			currentHeatTemp = currentCoolTemp + setPointDelta 
+			currentHeatTemp = currentCoolTemp - setPointDelta 
 		}
 	}
 
@@ -246,7 +246,7 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetT
 		currentHeatTemp = heatTemp
 
 		if ( (currentHeatTemp - currentCoolTemp) < setPointDelta ) { 
-			currentCoolTemp = currentHeatTemp - setPointDelta 
+			currentCoolTemp = currentHeatTemp + setPointDelta 
 		}
 	}
 
