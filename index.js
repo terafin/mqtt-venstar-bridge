@@ -214,7 +214,7 @@ const requiredSetpointDelta = function() {
 		setPointDelta = lastKnownState.setpointdelta
 	}
 
-	return setPointDelta
+	return Number(setPointDelta)
 }
 const roundToHalf = function(num) {
 	return Math.round(num * 2) / 2
@@ -237,7 +237,8 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetT
 		currentCoolTemp = coolTemp
 	
 		if ( (currentHeatTemp - currentCoolTemp) < setPointDelta ) { 
-			currentHeatTemp = currentCoolTemp - setPointDelta 
+			currentHeatTemp = Number(currentCoolTemp) - Number(setPointDelta)
+			logging.info(' * fixing setpoint, adjusting heat setpoint to: ' + currentHeatTemp + '  (required delta: ' + setPointDelta + ')')
 		}
 	}
 
@@ -246,7 +247,8 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetT
 		currentHeatTemp = heatTemp
 
 		if ( (currentHeatTemp - currentCoolTemp) < setPointDelta ) { 
-			currentCoolTemp = currentHeatTemp + setPointDelta 
+			currentCoolTemp = Number(currentHeatTemp) + Number(setPointDelta) 
+			logging.info(' * fixing setpoint, adjusting cool setpoint to: ' + currentCoolTemp + '  (required delta: ' + setPointDelta + ')')
 		}
 	}
 
