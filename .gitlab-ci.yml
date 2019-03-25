@@ -28,4 +28,9 @@ deploy:
   image: terafin/rancher-cli-k8s:latest
   script:
     - rancher login "$RANCHER_URL" --skip-verify --token "$RANCHER_BEARER_TOKEN" --context "$RANCHER_CONTEXT"
-    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
+    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-bedroom" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
+    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-entrance" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
+    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-guest-bedroom" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
+    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-study" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
+    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-living-room" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
+                
