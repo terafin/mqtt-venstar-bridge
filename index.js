@@ -4,6 +4,7 @@ const logging = require('homeautomation-js-lib/logging.js')
 const repeat = require('repeat')
 const health = require('homeautomation-js-lib/health.js')
 const request = require('request')
+const mqtt_helpers = require('homeautomation-js-lib/mqtt_helpers.js')
 
 const queryInterval = 15
 const updateTimer = 5
@@ -71,8 +72,6 @@ var pendingThermostatUpdate = false
 //                                  // 3: heat/cool only
 // }
 
-require('homeautomation-js-lib/mqtt_helpers.js')
-
 // Config
 var topic_prefix = process.env.TOPIC_PREFIX
 var thermostat_host = process.env.VENSTAR_HOST
@@ -113,7 +112,7 @@ var disconnectedEvent = function() {
 }
 
 // Setup MQTT
-const client = mqtt.setupClient(connectedEvent, disconnectedEvent)
+const client = mqtt_helpers.setupClient(connectedEvent, disconnectedEvent)
 
 var currentHVACMode = null
 var currentFanMode = null
