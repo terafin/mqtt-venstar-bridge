@@ -34,12 +34,10 @@ build:
 
 deploy:
   stage: deploy
-  image: terafin/rancher-cli-k8s:latest
   script:
-    - rancher login "$RANCHER_URL" --skip-verify --token "$RANCHER_BEARER_TOKEN" --context "$RANCHER_CONTEXT"
-    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-bedroom" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
-    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-entrance" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
-    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-guest-bedroom" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
-    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-study" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
-    - rancher kubectl --namespace="$RANCHER_NAMESPACE" patch deployment "$CI_PROJECT_NAME-living-room" -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"
-                
+    - apk add --update curl
+    - curl -H "X-Docker-Token:$DOCKER_AUTH_TOKEN"  -X GET "https://siliconspirit.net/hooks/docker-iot-update?DOCKER_SERVICE_NAME=automation_$CI_PROJECT_NAME-bedroom&DOCKER_IMAGE_PREFIX=$DOCKER_REGISTRY_USER&DOCKER_IMAGE_NAME=$CI_PROJECT_NAME&DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG"
+    - curl -H "X-Docker-Token:$DOCKER_AUTH_TOKEN"  -X GET "https://siliconspirit.net/hooks/docker-iot-update?DOCKER_SERVICE_NAME=automation_$CI_PROJECT_NAME-guest-bedroom&DOCKER_IMAGE_PREFIX=$DOCKER_REGISTRY_USER&DOCKER_IMAGE_NAME=$CI_PROJECT_NAME&DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG"
+    - curl -H "X-Docker-Token:$DOCKER_AUTH_TOKEN"  -X GET "https://siliconspirit.net/hooks/docker-iot-update?DOCKER_SERVICE_NAME=automation_$CI_PROJECT_NAME-entrance&DOCKER_IMAGE_PREFIX=$DOCKER_REGISTRY_USER&DOCKER_IMAGE_NAME=$CI_PROJECT_NAME&DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG"
+    - curl -H "X-Docker-Token:$DOCKER_AUTH_TOKEN"  -X GET "https://siliconspirit.net/hooks/docker-iot-update?DOCKER_SERVICE_NAME=automation_$CI_PROJECT_NAME-living-room&DOCKER_IMAGE_PREFIX=$DOCKER_REGISTRY_USER&DOCKER_IMAGE_NAME=$CI_PROJECT_NAME&DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG"
+    - curl -H "X-Docker-Token:$DOCKER_AUTH_TOKEN"  -X GET "https://siliconspirit.net/hooks/docker-iot-update?DOCKER_SERVICE_NAME=automation_$CI_PROJECT_NAME-study&DOCKER_IMAGE_PREFIX=$DOCKER_REGISTRY_USER&DOCKER_IMAGE_NAME=$CI_PROJECT_NAME&DOCKER_IMAGE_TAG=$DOCKER_IMAGE_TAG"
