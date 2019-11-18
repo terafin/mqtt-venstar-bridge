@@ -1,29 +1,29 @@
 {
-  "name": "mqtt-venstar-bridge",
-  "version": "1.0.0",
-  "description": "Venstar MQTT Bridge",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/terafin/mqtt-venstar-bridge.git"
-  },
-  "author": "Justin Wood",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/terafin/mqtt-venstar-bridge/issues"
-  },
-  "dependencies": {
-    "homeautomation-js-lib": "git+https://gitlab.siliconspirit.net/home/homeautomation-js-lib.git",
-    "lodash": "latest",
-    "mqtt": "latest",
-    "repeat": "0.0.6",
-    "request": "latest"
-  },
-  "engines": {
-    "node": ">=4"
-  },
-  "homepage": "https://github.com/terafin/mqtt-venstar-bridge#readme"
+    "name": "mqtt-venstar-bridge",
+    "version": "1.0.0",
+    "description": "Venstar MQTT Bridge",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/terafin/mqtt-venstar-bridge.git"
+    },
+    "author": "Justin Wood",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/terafin/mqtt-venstar-bridge/issues"
+    },
+    "dependencies": {
+        "homeautomation-js-lib": "https://github.com/terafin/homeautomation-js-lib.git",
+        "lodash": "latest",
+        "mqtt": "latest",
+        "repeat": "0.0.6",
+        "request": "latest"
+    },
+    "engines": {
+        "node": ">=4"
+    },
+    "homepage": "https://github.com/terafin/mqtt-venstar-bridge#readme"
 }
