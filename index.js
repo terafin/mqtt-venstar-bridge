@@ -1,13 +1,14 @@
 const mqtt = require('mqtt')
 const _ = require('lodash')
 const logging = require('homeautomation-js-lib/logging.js')
-const repeat = require('repeat')
 const health = require('homeautomation-js-lib/health.js')
 const request = require('request')
 const mqtt_helpers = require('homeautomation-js-lib/mqtt_helpers.js')
 
 const queryInterval = 15
 const updateTimer = 5
+
+var CronJob = require('cron').CronJob;
 
 var lastKnownState = null
 var pendingThermostatUpdate = false
@@ -161,7 +162,73 @@ client.on('message', (topic, message) => {
     }
 })
 
-const queryStatus = function(host) {
+
+const queryRuntimes = function(host) {
+    request('http://' + host + '/query/runtimes', function(error, response, body) {
+        if (_.isNil(error) && response.statusCode == 200) {
+            health.healthyEvent()
+
+            var runtimes = JSON.parse(body)
+
+            logging.debug(body)
+
+            if (_.isNil(runtimes) || _.isNil(runtimes.runtimes)) {
+                return
+            }
+
+            const runtime = _.last(runtimes.runtimes)
+            logging.debug('runtime: ' + JSON.stringify(runtime))
+            Object.keys(runtime).forEach(key => {
+                const value = runtime[key]
+                if (!_.isNil(value)) {
+                    client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'runtime', key.toString()), value.toString(), mqttOptions)
+                }
+            });
+
+
+        } else {
+            health.unhealthyEvent()
+            logging.error('query runtime failed: ' + error)
+            logging.error('        body: ' + body)
+        }
+    })
+}
+
+
+const querySensors = function(host) {
+    request('http://' + host + '/query/sensors', function(error, response, body) {
+        if (_.isNil(error) && response.statusCode == 200) {
+            health.healthyEvent()
+
+            var sensors = JSON.parse(body)
+
+            logging.debug(body)
+
+            if (_.isNil(sensors) || _.isNil(sensors.sensors)) {
+                return
+            }
+
+            sensors.sensors.forEach(sensor => {
+                logging.debug('sensor: ' + JSON.stringify(sensor))
+                if (!_.isNil(sensor.temp)) {
+                    client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'sensor', sensor.name.toString(), 'temp'), sensor.temp.toString(), mqttOptions)
+                }
+                if (!_.isNil(sensor.hum)) {
+                    client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'sensor', sensor.name.toString(), 'humidity'), sensor.hum.toString(), mqttOptions)
+                }
+            });
+
+
+        } else {
+            health.unhealthyEvent()
+            logging.error('query status failed: ' + error)
+            logging.error('        body: ' + body)
+        }
+    })
+}
+
+
+const queryInfo = function(host) {
     request('http://' + host + '/query/info', function(error, response, body) {
         if (_.isNil(error) && response.statusCode == 200) {
             health.healthyEvent()
@@ -200,36 +267,6 @@ const queryStatus = function(host) {
         } else {
             health.unhealthyEvent()
             logging.error('query failed: ' + error)
-            logging.error('        body: ' + body)
-        }
-    })
-
-    request('http://' + host + '/query/sensors', function(error, response, body) {
-        if (_.isNil(error) && response.statusCode == 200) {
-            health.healthyEvent()
-
-            var sensors = JSON.parse(body)
-
-            logging.debug(body)
-
-            if (_.isNil(sensors) || _.isNil(sensors.sensors)) {
-                return
-            }
-
-            sensors.sensors.forEach(sensor => {
-                logging.debug('sensor: ' + JSON.stringify(sensor))
-                if (!_.isNil(sensor.temp)) {
-                    client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'sensor', sensor.name.toString(), 'temp'), sensor.temp.toString(), mqttOptions)
-                }
-                if (!_.isNil(sensor.hum)) {
-                    client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'sensor', sensor.name.toString(), 'humidity'), sensor.hum.toString(), mqttOptions)
-                }
-            });
-
-
-        } else {
-            health.unhealthyEvent()
-            logging.error('query status failed: ' + error)
             logging.error('        body: ' + body)
         }
     })
@@ -358,14 +395,23 @@ const queueThermostatUpdate = function() {
     }, updateTimer * 1000)
 }
 
-const check = function() {
-    queryStatus(thermostat_host)
-}
+// Set up the main poll query, based on queryInterval
 
+const queryExpression = '*/' + queryInterval + ' * * * * *'
+var queryJob = new CronJob(queryExpression, function() {
+    queryInfo(thermostat_host)
+    querySensors(thermostat_host)
+}, null, true);
 
-const startHostCheck = function() {
-    logging.info('Starting to monitor: ' + thermostat_host)
-    repeat(check).every(queryInterval, 's').start.in(1, 'sec')
-}
+queryJob.start()
 
-startHostCheck()
+// Set up the runtime query on the hour
+const runtimeExpression = '0 * * * *'
+var runtimeQueryJob = new CronJob(queryExpression, function() {
+    queryRuntimes(thermostat_host)
+}, null, true);
+
+runtimeQueryJob.start()
+
+// May as well hit it once now :)
+queryRuntimes(thermostat_host)
