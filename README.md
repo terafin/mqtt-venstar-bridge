@@ -26,6 +26,13 @@ publish this to change "Bedroom" to 14/17 heat/cool limits
    value: 17
 ```
 
+publish this turn on "Bedroom" fan (supports, auto/off/on) 
+```
+   topic: /venstar/bedroom/fan/set
+   value: on
+```
+
+
 Here's an example docker compose:
 
 ```
