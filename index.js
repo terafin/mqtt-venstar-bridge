@@ -162,6 +162,33 @@ client.on('message', (topic, message) => {
     }
 })
 
+const queryAlerts = function(host) {
+    request('http://' + host + '/query/alerts', function(error, response, body) {
+        if (_.isNil(error) && response.statusCode == 200) {
+            health.healthyEvent()
+
+            var alerts = JSON.parse(body)
+
+            logging.debug(body)
+
+            if (_.isNil(alerts) || _.isNil(alerts.alerts)) {
+                return
+            }
+
+            alerts.alerts.forEach(alert => {
+                const value = alert.active == 'true' ? 1 : 0
+                client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'alert', alert.name.toString()), value.toString(), mqttOptions)
+            });
+
+        } else {
+            health.unhealthyEvent()
+            logging.error('query alerts failed: ' + error)
+            logging.error('        body: ' + body)
+        }
+    })
+}
+
+
 
 const queryRuntimes = function(host) {
     request('http://' + host + '/query/runtimes', function(error, response, body) {
@@ -401,6 +428,7 @@ const queryExpression = '*/' + queryInterval + ' * * * * *'
 var queryJob = new CronJob(queryExpression, function() {
     queryInfo(thermostat_host)
     querySensors(thermostat_host)
+    queryAlerts(thermostat_host)
 }, null, true);
 
 queryJob.start()
