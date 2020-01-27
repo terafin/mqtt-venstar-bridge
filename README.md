@@ -32,6 +32,14 @@ publish this turn on "Bedroom" fan (supports, auto/off/on)
    value: on
 ```
 
+Settings are supported by publishing to:
+
+```
+   topic: /venstar/bedroom/setting/<SETTING_NAME>/set
+   value: <SETTING_VALUE>
+```
+
+Settings supported are listed on this page: <https://developer.venstar.com/restcalls.html>
 
 Here's an example docker compose:
 
