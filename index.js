@@ -120,6 +120,8 @@ var currentFanMode = null
 var currentHeatTemp = null
 var currentCoolTemp = null
 
+var updateFanMode = null
+
 client.on('message', (topic, message) => {
     logging.info(' ' + topic + ':' + message, {
         topic: topic,
@@ -296,10 +298,10 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetT
     switch (fanMode) {
         case 'auto':
         case 'off':
-            currentFanMode = 0
+            updateFanMode = 0
             break
         case 'on':
-            currentFanMode = 1
+            updateFanMode = 1
             break
     }
 
@@ -309,13 +311,16 @@ const updateThermostat = function(hvacMode, fanMode, coolTemp, heatTemp, targetT
 const sendThermostatUpdate = function() {
     logging.info('queued timer fired')
 
-    const formValue = {
+    var formValue = {
         mode: currentHVACMode,
-        fan: 0,
         heattemp: currentHeatTemp,
         cooltemp: currentCoolTemp
     }
 
+    if (!_.isNil(updateFanMode)) {
+        formValue.fan = updateFanMode
+        updateFanMode = null
+    }
     logging.info('updating with value: ' + JSON.stringify(formValue))
 
     request.post({
