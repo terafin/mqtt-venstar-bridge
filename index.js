@@ -23,26 +23,26 @@ if (_.isNil(shouldRetain)) {
 
 mqttOptions['retain'] = shouldRetain
 
-var connectedEvent = function() {
+var connectedEvent = function () {
     health.healthyEvent()
 
     const topics = [topic_prefix + '/fan/set',
-        topic_prefix + '/query',
-        topic_prefix + '/mode/set',
-        topic_prefix + '/setting/+/set',
-        topic_prefix + '/temperature/target/set',
-        topic_prefix + '/temperature/cool/set',
-        topic_prefix + '/temperature/heat/set'
+    topic_prefix + '/query',
+    topic_prefix + '/mode/set',
+    topic_prefix + '/setting/+/set',
+    topic_prefix + '/temperature/target/set',
+    topic_prefix + '/temperature/cool/set',
+    topic_prefix + '/temperature/heat/set'
     ]
 
     logging.info('Connected, subscribing ')
-    topics.forEach(function(topic) {
+    topics.forEach(function (topic) {
         logging.info(' => Subscribing to: ' + topic)
         client.subscribe(topic, { qos: 1 })
     }, this)
 }
 
-var disconnectedEvent = function() {
+var disconnectedEvent = function () {
     health.unhealthyEvent()
 }
 
@@ -122,7 +122,7 @@ venstar.on('query-response', (type, result) => {
     Object.keys(result).forEach(key => {
         const value = result[key]
         if (!_.isNil(value)) {
-            client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'result', type, key.toString()), value.toString(), mqttOptions)
+            client.publish(mqtt_helpers.generateTopic(topic_prefix, 'result', type, key.toString()), value.toString())
         }
     });
 })
