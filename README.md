@@ -39,6 +39,9 @@ Settings are supported by publishing to:
    value: <SETTING_VALUE>
 ```
 
+Settings supported are listed on this page: <https://developer.venstar.com/restcalls.html>
+
+
 You can also query runtimes at any given time by publishing
 
 ```
@@ -47,8 +50,6 @@ You can also query runtimes at any given time by publishing
 ```
 
 results should publish at: `/venstar/bedroom/result/runtime/KEY:VALUE`
-
-Settings supported are listed on this page: <https://developer.venstar.com/restcalls.html>
 
 Here's an example docker compose:
 
