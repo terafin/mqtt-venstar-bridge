@@ -27,6 +27,7 @@ var connectedEvent = function() {
     health.healthyEvent()
 
     const topics = [topic_prefix + '/fan/set',
+        topic_prefix + '/query',
         topic_prefix + '/mode/set',
         topic_prefix + '/setting/+/set',
         topic_prefix + '/temperature/target/set',
@@ -61,6 +62,12 @@ client.on('message', (topic, message) => {
             value: target
         })
         venstar.updateThermostat(target, 'none', 0, 0, 0)
+    } else if (topic.indexOf('/query') >= 0) {
+        logging.info('Querying: ' + target, {
+            action: 'query',
+            result: target
+        })
+        venstar.query(target)
     } else if (topic.indexOf('/fan/set') >= 0) {
         logging.info('MQTT Set Fan Mode: ' + target, {
             action: 'setfanmode',
@@ -107,6 +114,15 @@ venstar.on('runtime-updated', (runtime) => {
         const value = runtime[key]
         if (!_.isNil(value)) {
             client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'runtime', key.toString()), value.toString(), mqttOptions)
+        }
+    });
+})
+
+venstar.on('query-response', (type, result) => {
+    Object.keys(result).forEach(key => {
+        const value = result[key]
+        if (!_.isNil(value)) {
+            client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'result', type, key.toString()), value.toString(), mqttOptions)
         }
     });
 })
