@@ -20,7 +20,7 @@
         "lodash": "latest",
         "mqtt": "latest",
         "cron": "^1.8.2",
-        "request": "latest"
+        "request": "2.88.2"
     },
     "engines": {
         "node": ">=4"
