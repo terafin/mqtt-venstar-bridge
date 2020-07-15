@@ -1,6 +1,6 @@
 {
     "name": "mqtt-venstar-bridge",
-    "version": "1.0.1",
+    "version": "1.0.0",
     "description": "Venstar MQTT Bridge",
     "main": "index.js",
     "scripts": {
