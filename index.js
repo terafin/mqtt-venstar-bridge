@@ -114,7 +114,7 @@ venstar.on('runtime-updated', (runtime) => {
         if (!_.isNil(value)) {
             client.smartPublish(mqtt_helpers.generateTopic(topic_prefix, 'runtime', key.toString()), value.toString(), mqttOptions)
         }
-    });
+    })
 })
 
 venstar.on('query-response', (type, result) => {
@@ -123,7 +123,7 @@ venstar.on('query-response', (type, result) => {
         if (!_.isNil(value)) {
             client.publish(mqtt_helpers.generateTopic(topic_prefix, 'result', type, key.toString()), value.toString())
         }
-    });
+    })
 })
 
 venstar.on('sensor-updated', (sensor) => {
