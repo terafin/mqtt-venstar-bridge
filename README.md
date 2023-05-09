@@ -9,7 +9,7 @@ I have a collection of bridges, and the general format of these begins with thes
       MQTT_HOST: YOUR_MQTT_URL (eg: mqtt://mqtt.yourdomain.net)
       (OPTIONAL) MQTT_USER: YOUR_MQTT_USERNAME
       (OPTIONAL) MQTT_PASS: YOUR_MQTT_PASSWORD
-````
+```
 
 For changing states '/set' commands also work, eg:
 
@@ -67,6 +67,7 @@ services:
       TOPIC_PREFIX: /your_topic_prefix  (eg: /venstar/living_room)
 
       VENSTAR_HOST: YOUR_VENSTAR_IP
+      (OPTIONAL) VENSTAR_QUERY_INTERVAL: 15 (seconds between queries, 15 is default)
 
       MQTT_HOST: YOUR_MQTT_URL (eg: mqtt://mqtt.yourdomain.net)
       (OPTIONAL) MQTT_USER: YOUR_MQTT_USERNAME
