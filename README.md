@@ -60,7 +60,7 @@ Here's an example docker compose:
 version: '3.3'
 services:
   mqtt-venstar-bridge:
-    image: terafin/mqtt-venstar-bridge:latest
+    image: ghcr.io/terafin/mqtt-venstar-bridge:latest
     environment:
       LOGGING_NAME: mqtt-venstar-bridge
       TZ: America/Los_Angeles
